@@ -22,7 +22,7 @@ type CommonConfig struct {
 	SrName             string   `mapstructure:"sr_name"`
 	SrUuid             string   `mapstructure:"sr_uuid" required:"false"`
 	SrISOName          string   `mapstructure:"sr_iso_name" required:"false"`
-	SrISOUuid          string   `mapstructure:"sn_iso_uuid" required:"false"`
+	SrISOUuid          string   `mapstructure:"sr_iso_uuid" required:"false"`
 	FloppyFiles        []string `mapstructure:"floppy_files"`
 	NetworkNames       []string `mapstructure:"network_names"`
 	ExportNetworkNames []string `mapstructure:"export_network_names"`
