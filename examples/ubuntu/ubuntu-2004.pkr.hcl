@@ -67,10 +67,22 @@ variable "sr_iso_name" {
 
 }
 
+variable "sr_iso_uuid" {
+  type        = string
+  default     = ""
+  description = The UUID of the SR to packer will use
+}
+
 variable "sr_name" {
   type        = string
   default     = ""
   description = "The name of the SR to packer will use"
+}
+
+variable "sr_uuid" {
+  type        = string
+  default     = ""
+  description = The UUID of the SR to packer will use
 }
 
 source "xenserver-iso" "ubuntu-2004" {
@@ -78,7 +90,9 @@ source "xenserver-iso" "ubuntu-2004" {
   iso_url           = "https://releases.ubuntu.com/${local.ubuntu_version}/ubuntu-${local.ubuntu_version}.${local.ubuntu_url_path.0}-live-server-amd64.iso"
 
   sr_iso_name    = var.sr_iso_name
+  sr_iso_uuid    = var.sr_iso_uuid
   sr_name        = var.sr_name
+  sr_uuid        = var.sr_uuid
   tools_iso_name = "guest-tools.iso"
 
   remote_host     = var.remote_host
