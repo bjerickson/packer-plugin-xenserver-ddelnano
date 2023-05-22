@@ -20,7 +20,9 @@ type CommonConfig struct {
 	VMName             string   `mapstructure:"vm_name"`
 	VMDescription      string   `mapstructure:"vm_description"`
 	SrName             string   `mapstructure:"sr_name"`
+	SrUuid             string   `mapstructure:"sr_uuid" required:"false"`
 	SrISOName          string   `mapstructure:"sr_iso_name" required:"false"`
+	SrISOUuid          string   `mapstructure:"sn_iso_uuid" required:"false"`
 	FloppyFiles        []string `mapstructure:"floppy_files"`
 	NetworkNames       []string `mapstructure:"network_names"`
 	ExportNetworkNames []string `mapstructure:"export_network_names"`
@@ -224,50 +226,90 @@ func (c CommonConfig) ShouldKeepVM(state multistep.StateBag) bool {
 }
 
 func (config CommonConfig) GetSR(c *Connection) (xenapi.SRRef, error) {
-	if config.SrName == "" {
+	if config.SrName == "" && config.SrUuid == "" {
 		return getDefaultSR(c)
 	} else {
 		var srRef xenapi.SRRef
 
-		// Use the provided name label to find the SR to use
-		srs, err := c.GetClient().SR.GetByNameLabel(c.session, config.SrName)
+		// If both the uuid and the name are provided, use the UUID
+		if config.SrName != "" && config.SrUuid != "" {
+			srs, err := c.GetClient().SR.GetByUUID(c.session, config.SrUuid)
 
-		if err != nil {
-			return srRef, err
+			if err != nil {
+				return srRef, err
+			}
+
+			return srs, nil
+
+		} else if config.SrUuid != "" {
+			srs, err := c.GetClient().SR.GetByUUID(c.session, config.SrUuid)
+
+			if err != nil {
+				return srRef, err
+			}
+
+			return srs, nil
+		} else {
+			// Use the provided name label to find the SR to use
+			srs, err := c.GetClient().SR.GetByNameLabel(c.session, config.SrName)
+
+			if err != nil {
+				return srRef, err
+			}
+
+			switch {
+			case len(srs) == 0:
+				return srRef, fmt.Errorf("Couldn't find a SR with the specified name-label '%s'", config.SrName)
+			case len(srs) > 1:
+				return srRef, fmt.Errorf("Found more than one SR with the name '%s'. The name must be unique", config.SrName)
+			}
+
+			return srs[0], nil
 		}
-
-		switch {
-		case len(srs) == 0:
-			return srRef, fmt.Errorf("Couldn't find a SR with the specified name-label '%s'", config.SrName)
-		case len(srs) > 1:
-			return srRef, fmt.Errorf("Found more than one SR with the name '%s'. The name must be unique", config.SrName)
-		}
-
-		return srs[0], nil
 	}
 }
 
 func (config CommonConfig) GetISOSR(c *Connection) (xenapi.SRRef, error) {
 	var srRef xenapi.SRRef
-	if config.SrISOName == "" {
+	if config.SrISOName == "" && config.SrISOUuid == "" {
 		return getDefaultSR(c)
 
 	} else {
-		// Use the provided name label to find the SR to use
-		srs, err := c.GetClient().SR.GetByNameLabel(c.session, config.SrISOName)
 
-		if err != nil {
-			return srRef, err
+		// If both uuid and the name are provided, use the UUID
+		if config.SrISOName != "" && config.SrISOUuid != "" {
+			srs, err := c.GetClient().SR.GetByUUID(c.session, config.SrISOUuid)
+
+			if err != nil {
+				return srRef, err
+			}
+
+			return srs, nil
+		} else if config.SrISOUuid != "" {
+			srs, err := c.GetClient().SR.GetByUUID(c.session, config.SrISOUuid)
+
+			if err != nil {
+				return srRef, err
+			}
+
+			return srs, nil
+		} else {
+			// Use the provided name label to find the SR to use
+			srs, err := c.GetClient().SR.GetByNameLabel(c.session, config.SrISOName)
+
+			if err != nil {
+				return srRef, err
+			}
+
+			switch {
+			case len(srs) == 0:
+				return srRef, fmt.Errorf("Couldn't find a SR with the specified name-label '%s'", config.SrISOName)
+			case len(srs) > 1:
+				return srRef, fmt.Errorf("Found more than one SR with the name '%s'. The name must be unique", config.SrISOName)
+			}
+
+			return srs[0], nil
 		}
-
-		switch {
-		case len(srs) == 0:
-			return srRef, fmt.Errorf("Couldn't find a SR with the specified name-label '%s'", config.SrISOName)
-		case len(srs) > 1:
-			return srRef, fmt.Errorf("Found more than one SR with the name '%s'. The name must be unique", config.SrISOName)
-		}
-
-		return srs[0], nil
 	}
 }
 

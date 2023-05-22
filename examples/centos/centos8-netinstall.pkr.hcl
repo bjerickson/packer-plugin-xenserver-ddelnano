@@ -36,10 +36,22 @@ variable "sr_iso_name" {
 
 }
 
+variable "sr_iso_uuid" {
+  type        = string
+  default     = ""
+  description = The UUID of the SR to packer will use
+}
+
 variable "sr_name" {
   type        = string
   default     = ""
   description = "The name of the SR to packer will use"
+}
+
+variable "sr_uuid" {
+  type        = string
+  default     = ""
+  description = The UUID of the SR to packer will use
 }
 
 locals {
@@ -51,7 +63,9 @@ source "xenserver-iso" "centos8-netinstall" {
   iso_url           = "http://mirrors.ocf.berkeley.edu/centos/8.3.2011/isos/x86_64/CentOS-8.3.2011-x86_64-boot.iso"
 
   sr_iso_name    = var.sr_iso_name
+  sr_iso_uuid    = var.sr_iso_uuid
   sr_name        = var.sr_name
+  sr_uuid        = var.sr_uuid
   tools_iso_name = "guest-tools.iso"
 
   remote_host     = var.remote_host
