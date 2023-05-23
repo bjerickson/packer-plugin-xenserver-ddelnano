@@ -141,10 +141,10 @@ func (self *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (p
 			VdiName:    self.config.ToolsIsoName,
 			VdiUuidKey: "tools_vdi_uuid",
 		},
+		new(stepImportInstance),
 		&xscommon.StepCreateInstance{
 			AssumePreInstalledOS: true,
 		},
-		new(stepImportInstance),
 		&xscommon.StepAttachVdi{
 			VdiUuidKey: "floppy_vdi_uuid",
 			VdiType:    xsclient.VbdTypeFloppy,
