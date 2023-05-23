@@ -31,8 +31,7 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	// find the SR
-	srs, err := c.GetClient().SR.GetAll(c.GetSessionRef())
-	sr := srs[0]
+	sr, err := config.GetSR(c)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Unable to get SR: %s", err.Error()))
 		return multistep.ActionHalt

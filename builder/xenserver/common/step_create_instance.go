@@ -29,7 +29,10 @@ func (self *StepCreateInstance) Run(ctx context.Context, state multistep.StateBa
 	ui.Say("Step: Create Instance")
 
 	// Get the template to clone from
-
+	if config.SourcePath != "" {
+		log.Println("Skipping create instance - `source_path` configured.")
+		return multistep.ActionContinue
+	}
 	vms, err := c.GetClient().VM.GetByNameLabel(c.GetSessionRef(), config.CloneTemplate)
 
 	switch {
