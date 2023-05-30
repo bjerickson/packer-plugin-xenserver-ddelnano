@@ -36,7 +36,7 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		ui.Error(fmt.Sprintf("Unable to get SR: %s", err.Error()))
 		return multistep.ActionHalt
 	}
-	log.Println(fmt.Sprintf("SR rerference: %s", sr))
+	ui.Say(fmt.Sprintf("SR rerference: %s", sr))
 
 	// Open the file for reading (NB: httpUpload closes the file for us)
 	fh, err := os.Open(config.SourcePath)
@@ -60,7 +60,7 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	instance := xsclient.VMRef(result)
-	log.Println(fmt.Sprintf("Instance reference: %s", instance))
+	ui.Say(fmt.Sprintf("Instance reference: %s", instance))
 	return multistep.ActionHalt
 
 	instanceId, err := c.GetClient().VM.GetUUID(c.GetSessionRef(), instance)
