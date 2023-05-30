@@ -36,6 +36,7 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		ui.Error(fmt.Sprintf("Unable to get SR: %s", err.Error()))
 		return multistep.ActionHalt
 	}
+	log.Println(fmt.Sprintf("SR rerference: %s", sr))
 
 	// Open the file for reading (NB: httpUpload closes the file for us)
 	fh, err := os.Open(config.SourcePath)
@@ -59,31 +60,16 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	instance := xsclient.VMRef(result)
-	ui.Say(fmt.Sprintf("Successful import of: %s", instance))
+	log.Println(fmt.Sprintf("Instance reference: %s", instance))
+	return multistep.ActionHalt
+
+	instanceId, err := c.GetClient().VM.GetUUID(c.GetSessionRef(), instance)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Unable to get VM UUID: %s", err.Error()))
+		return multistep.ActionHalt
+	}
+	state.Put("instance_uuid", instanceId)
 	/*
-		// Check if the VM import is a template
-		instanceTempate, err := c.GetClient().VM.GetIsATemplate(c.GetSessionRef(), instance)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Unable to check for Template: %s", err.Error()))
-			return multistep.ActionHalt
-		}
-
-		// Convert Import to VM if imported with Template flag
-		if instanceTempate {
-			err := c.GetClient().VM.SetIsATemplate(c.GetSessionRef(), instance, false)
-			if err != nil {
-				ui.Error(fmt.Sprintf("Unable to convert Template to VM: %s", err.Error()))
-				return multistep.ActionHalt
-			}
-		}
-
-		instanceId, err := c.GetClient().VM.GetUUID(c.GetSessionRef(), instance)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Unable to get VM UUID: %s", err.Error()))
-			return multistep.ActionHalt
-		}
-		state.Put("instance_uuid", instanceId)
-
 		//Rename the VM to what we have defined in the config
 		err = c.GetClient().VM.SetNameLabel(c.GetSessionRef(), instance, config.VMName)
 		if err != nil {
@@ -115,9 +101,8 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 			return multistep.ActionHalt
 		}
 
-		ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
 	*/
-
+	ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
 	return multistep.ActionContinue
 }
 
