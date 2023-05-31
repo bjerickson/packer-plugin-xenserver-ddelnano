@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -57,6 +58,10 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 	if result == "" {
 		ui.Error("XAPI did not reply with an instance reference")
 		return multistep.ActionHalt
+	}
+	if strings.Contains(result, "<value>") {
+		r := regexp.MustCompile(`<.*?>`)
+		result = r.ReplaceAllString(result, "")
 	}
 
 	instance := xsclient.VMRef(result)
