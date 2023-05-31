@@ -24,7 +24,9 @@ type FlatConfig struct {
 	VMName                    *string           `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
 	VMDescription             *string           `mapstructure:"vm_description" cty:"vm_description" hcl:"vm_description"`
 	SrName                    *string           `mapstructure:"sr_name" cty:"sr_name" hcl:"sr_name"`
+	SrUuid                    *string           `mapstructure:"sr_uuid" cty:"sr_uuid" hcl:"sr_uuid"`
 	SrISOName                 *string           `mapstructure:"sr_iso_name" required:"false" cty:"sr_iso_name" hcl:"sr_iso_name"`
+	SrISOUuid                 *string           `mapstructure:"sr_iso_uuid" required:"false" cty:"sr_iso_uuid" hcl:"sr_iso_uuid"`
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
 	NetworkNames              []string          `mapstructure:"network_names" cty:"network_names" hcl:"network_names"`
 	ExportNetworkNames        []string          `mapstructure:"export_network_names" cty:"export_network_names" hcl:"export_network_names"`
@@ -137,7 +139,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"vm_description":               &hcldec.AttrSpec{Name: "vm_description", Type: cty.String, Required: false},
 		"sr_name":                      &hcldec.AttrSpec{Name: "sr_name", Type: cty.String, Required: false},
+		"sr_uuid":                      &hcldec.AttrSpec{Name: "sr_uuid", Type: cty.String, Required: false},
 		"sr_iso_name":                  &hcldec.AttrSpec{Name: "sr_iso_name", Type: cty.String, Required: false},
+		"sr_iso_uuid":                  &hcldec.AttrSpec{Name: "sr_iso_uuid", Type: cty.String, Required: false},
 		"floppy_files":                 &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"network_names":                &hcldec.AttrSpec{Name: "network_names", Type: cty.List(cty.String), Required: false},
 		"export_network_names":         &hcldec.AttrSpec{Name: "export_network_names", Type: cty.List(cty.String), Required: false},

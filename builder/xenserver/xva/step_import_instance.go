@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
@@ -31,12 +33,12 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	// find the SR
-	srs, err := c.GetClient().SR.GetAll(c.GetSessionRef())
-	sr := srs[0]
+	sr, err := config.GetSR(c)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Unable to get SR: %s", err.Error()))
 		return multistep.ActionHalt
 	}
+	ui.Say(fmt.Sprintf("SR rerference: %s", sr))
 
 	// Open the file for reading (NB: httpUpload closes the file for us)
 	fh, err := os.Open(config.SourcePath)
@@ -58,15 +60,42 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		ui.Error("XAPI did not reply with an instance reference")
 		return multistep.ActionHalt
 	}
+	if strings.Contains(result, "<value>") {
+		r := regexp.MustCompile(`<.*?>`)
+		result = r.ReplaceAllString(result, "")
+	}
 
 	instance := xsclient.VMRef(result)
+	ui.Say(fmt.Sprintf("Instance reference: %s", instance))
 
 	instanceId, err := c.GetClient().VM.GetUUID(c.GetSessionRef(), instance)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Unable to get VM UUID: %s", err.Error()))
 		return multistep.ActionHalt
 	}
-	state.Put("instance_uuid", instanceId)
+
+	// If the import is a template, convert to a VM
+	isTemplate, err := c.GetClient().VM.GetIsATemplate(c.GetSessionRef(), instance)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Unable to find instance information: %s", err.Error()))
+		return multistep.ActionHalt
+	}
+
+	// Convert template to a vm if imported as a template
+	if isTemplate {
+		err = c.GetClient().VM.SetIsATemplate(c.GetSessionRef(), instance, false)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error converting instance to a VM: %s", err.Error()))
+			return multistep.ActionHalt
+		}
+	}
+
+	//Rename the VM to what we have defined in the config
+	err = c.GetClient().VM.SetNameLabel(c.GetSessionRef(), instance, config.VMName)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Unable to Rename VM: %s", err.Error()))
+		return multistep.ActionHalt
+	}
 
 	err = c.GetClient().VM.SetVCPUsMax(c.GetSessionRef(), instance, int(config.VCPUsMax))
 	if err != nil {
@@ -91,9 +120,9 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		ui.Error(fmt.Sprintf("Failed to add tags: %s", err.Error()))
 		return multistep.ActionHalt
 	}
-
+	// Set the instance_uuid for the imported VM
+	state.Put("instance_uuid", instanceId)
 	ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
-
 	return multistep.ActionContinue
 }
 
