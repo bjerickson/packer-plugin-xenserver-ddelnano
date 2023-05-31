@@ -120,7 +120,8 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		ui.Error(fmt.Sprintf("Failed to add tags: %s", err.Error()))
 		return multistep.ActionHalt
 	}
-
+	// Set the instance_uuid for the imported VM
+	state.Put("instance_uuid", instanceId)
 	ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
 	return multistep.ActionContinue
 }

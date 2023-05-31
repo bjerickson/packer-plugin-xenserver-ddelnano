@@ -24,9 +24,7 @@ func (self *StepAttachVdi) Run(ctx context.Context, state multistep.StateBag) mu
 	log.Printf("Running attach vdi for key %s\n", self.VdiUuidKey)
 	var vdiUuid string
 	if vdiUuidRaw, ok := state.GetOk(self.VdiUuidKey); ok {
-		log.Printf("vdiUuidRaw: %s", vdiUuidRaw)
 		vdiUuid = vdiUuidRaw.(string)
-		log.Printf("vdiUuid: %s", vdiUuid)
 	} else {
 		log.Printf("Skipping attach of '%s'", self.VdiUuidKey)
 		return multistep.ActionContinue
