@@ -122,7 +122,7 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
-	return multistep.ActionHalt
+	return multistep.ActionContinue
 }
 
 func (self *stepImportInstance) Cleanup(state multistep.StateBag) {
