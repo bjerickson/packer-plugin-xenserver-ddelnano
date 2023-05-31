@@ -77,6 +77,9 @@ func (self *Builder) Prepare(raws ...interface{}) (params []string, warns []stri
 	if self.config.SourcePath == "" && self.config.CloneTemplate == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("Either source_path or clone_template must be specified"))
+	} else if self.config.SourcePath != "" && self.config.CloneTemplate != "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("Only one of source_path and clone_template must be specified"))
 	}
 
 	if len(errs.Errors) > 0 {

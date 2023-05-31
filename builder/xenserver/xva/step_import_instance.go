@@ -73,39 +73,54 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		ui.Error(fmt.Sprintf("Unable to get VM UUID: %s", err.Error()))
 		return multistep.ActionHalt
 	}
-	/*
-		//Rename the VM to what we have defined in the config
-		err = c.GetClient().VM.SetNameLabel(c.GetSessionRef(), instance, config.VMName)
+
+	// If the import is a template, convert to a VM
+	isTemplate, err := c.GetClient().VM.GetIsATemplate(c.GetSessionRef(), instance)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Unable to find instance information: %s", err.Error()))
+		return multistep.ActionHalt
+	}
+
+	// Convert template to a vm if imported as a template
+	if isTemplate {
+		err = c.GetClient().VM.SetIsATemplate(c.GetSessionRef(), instance, false)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Unable to Rename VM: %s", err.Error()))
+			ui.Error(fmt.Sprintf("Error converting instance to a VM: %s", err.Error()))
 			return multistep.ActionHalt
 		}
+	}
 
-		err = c.GetClient().VM.SetVCPUsMax(c.GetSessionRef(), instance, int(config.VCPUsMax))
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error setting VM VCPUs Max=%d: %s", config.VCPUsMax, err.Error()))
-			return multistep.ActionHalt
-		}
+	//Rename the VM to what we have defined in the config
+	err = c.GetClient().VM.SetNameLabel(c.GetSessionRef(), instance, config.VMName)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Unable to Rename VM: %s", err.Error()))
+		return multistep.ActionHalt
+	}
 
-		err = c.GetClient().VM.SetVCPUsAtStartup(c.GetSessionRef(), instance, int(config.VCPUsAtStartup))
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error setting VM VCPUs At Startup=%d: %s", config.VCPUsAtStartup, err.Error()))
-			return multistep.ActionHalt
-		}
+	err = c.GetClient().VM.SetVCPUsMax(c.GetSessionRef(), instance, int(config.VCPUsMax))
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error setting VM VCPUs Max=%d: %s", config.VCPUsMax, err.Error()))
+		return multistep.ActionHalt
+	}
 
-		err = c.GetClient().VM.SetNameDescription(c.GetSessionRef(), instance, config.VMDescription)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error setting VM description: %s", err.Error()))
-			return multistep.ActionHalt
-		}
+	err = c.GetClient().VM.SetVCPUsAtStartup(c.GetSessionRef(), instance, int(config.VCPUsAtStartup))
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error setting VM VCPUs At Startup=%d: %s", config.VCPUsAtStartup, err.Error()))
+		return multistep.ActionHalt
+	}
 
-		err = xscommon.AddVMTags(c, instance, config.VMTags)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Failed to add tags: %s", err.Error()))
-			return multistep.ActionHalt
-		}
+	err = c.GetClient().VM.SetNameDescription(c.GetSessionRef(), instance, config.VMDescription)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error setting VM description: %s", err.Error()))
+		return multistep.ActionHalt
+	}
 
-	*/
+	err = xscommon.AddVMTags(c, instance, config.VMTags)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Failed to add tags: %s", err.Error()))
+		return multistep.ActionHalt
+	}
+
 	ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
 	return multistep.ActionHalt
 }
