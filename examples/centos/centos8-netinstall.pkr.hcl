@@ -39,7 +39,7 @@ variable "sr_iso_name" {
 variable "sr_iso_uuid" {
   type        = string
   default     = ""
-  description = The UUID of the SR to packer will use
+  description = "The UUID of the SR to packer will use"
 }
 
 variable "sr_name" {
@@ -51,7 +51,7 @@ variable "sr_name" {
 variable "sr_uuid" {
   type        = string
   default     = ""
-  description = The UUID of the SR to packer will use
+  description = "The UUID of the SR to packer will use"
 }
 
 locals {
