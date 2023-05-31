@@ -61,14 +61,12 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 
 	instance := xsclient.VMRef(result)
 	ui.Say(fmt.Sprintf("Instance reference: %s", instance))
-	return multistep.ActionHalt
 
 	instanceId, err := c.GetClient().VM.GetUUID(c.GetSessionRef(), instance)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Unable to get VM UUID: %s", err.Error()))
 		return multistep.ActionHalt
 	}
-	state.Put("instance_uuid", instanceId)
 	/*
 		//Rename the VM to what we have defined in the config
 		err = c.GetClient().VM.SetNameLabel(c.GetSessionRef(), instance, config.VMName)
@@ -103,7 +101,7 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 
 	*/
 	ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
-	return multistep.ActionContinue
+	return multistep.ActionHalt
 }
 
 func (self *stepImportInstance) Cleanup(state multistep.StateBag) {
