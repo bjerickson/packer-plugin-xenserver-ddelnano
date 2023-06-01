@@ -74,6 +74,9 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 
+	// Set the instance_uuid for the imported VM
+	state.Put("instance_uuid", instanceId)
+
 	// If the import is a template, convert to a VM
 	isTemplate, err := c.GetClient().VM.GetIsATemplate(c.GetSessionRef(), instance)
 	if err != nil {
@@ -120,8 +123,6 @@ func (self *stepImportInstance) Run(ctx context.Context, state multistep.StateBa
 		ui.Error(fmt.Sprintf("Failed to add tags: %s", err.Error()))
 		return multistep.ActionHalt
 	}
-	// Set the instance_uuid for the imported VM
-	state.Put("instance_uuid", instanceId)
 	ui.Say(fmt.Sprintf("Imported instance '%s'", instanceId))
 	return multistep.ActionContinue
 }
