@@ -52,6 +52,7 @@ variable "sr_uuid" {
   type        = string
   default     = ""
   description = "The UUID of the SR to packer will use"
+
 }
 
 locals {
